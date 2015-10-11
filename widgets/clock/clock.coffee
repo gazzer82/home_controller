@@ -8,11 +8,20 @@ class Dashing.Clock extends Dashing.Widget
 
     h = today.getHours()
     m = today.getMinutes()
-    s = today.getSeconds()
     m = @formatTime(m)
-    s = @formatTime(s)
-    @set('time', h + ":" + m + ":" + s)
-    @set('date', today.toDateString())
+    @set('time', @formatHours(h) + ":" + m + " " + @formatAmPm(h))
+    @set('date', today.toLocaleDateString())
 
   formatTime: (i) ->
     if i < 10 then "0" + i else i
+
+  formatAmPm: (h) ->
+    if h >= 12 then "PM" else "AM"
+
+  formatHours: (h) ->
+    if h > 12
+      h - 12
+    else if h == 0
+      12
+    else
+      h
