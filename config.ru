@@ -1,6 +1,5 @@
-require 'dashing'
-require 'sinatra'
 require 'data_mapper'
+require 'dashing'
 
 configure do
   # The auth token used by external clients to get API access to the
