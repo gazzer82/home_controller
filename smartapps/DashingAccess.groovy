@@ -38,7 +38,7 @@ preferences {
         input "switches", "capability.switch", title: "Which switches?", multiple: true, required: false
         input "temperatures", "capability.temperatureMeasurement", title: "Which temperature sensors?", multiple: true, required: false
         input "humidities", "capability.relativeHumidityMeasurement", title: "Which humidity sensors?", multiple: true, required: false
-
+        input "illuminances", "capability.illuminanceMeasurement", title: "Which illuminance sensors?", multiple: true, required: false
     }
 }
 
@@ -117,6 +117,11 @@ mappings {
             GET: "getHumidity"
         ]
     }
+    path("/illuminance") {
+        action: [
+            GET: "getIlluminance"
+        ]
+    }
     path("/weather") {
         action: [
             GET: "getWeather"
@@ -151,7 +156,7 @@ def initialize() {
         "switch": [:],
         "temperature": [:],
         "humidity": [:],
-
+        "illuminance" [:],
         ]
 
     subscribe(contacts, "contact", contactHandler)
@@ -165,6 +170,7 @@ def initialize() {
     subscribe(switches, "switch", switchHandler)
     subscribe(temperatures, "temperature", temperatureHandler)
     subscribe(humidities, "humidity", humidityHandler)
+    subscribe(illuminances, "illuminance", illuminanceHandler)
 
 }
 
@@ -612,6 +618,40 @@ def getHumidity() {
 
 def humidityHandler(evt) {
     def widgetId = state.widgets.humidity[evt.displayName]
+    notifyWidget(widgetId, ["value": evt.value])
+}
+
+//
+// Illuminances
+//
+def getIlluminance() {
+    def deviceId = request.JSON?.deviceId
+    log.debug "getIlluminance ${deviceId}"
+
+    if (deviceId) {
+        registerWidget("illuminance", deviceId, request.JSON?.widgetId)
+
+        def whichIlluminance = illuminance.find { it.displayName == deviceId }
+        if (!whichIlluminance) {
+            return respondWithStatus(404, "Device '${deviceId}' not found.")
+        } else {
+            return [
+                "deviceId": deviceId,
+                "value": whichIlluminance.currentIlluminance]
+        }
+    }
+
+    def result = [:]
+    illuminances.each {
+        result[it.displayName] = [
+            "value": it.currentIlluminance,
+            "widgetId": state.widgets.illuminance[it.displayName]]}
+
+    return result
+}
+
+def illuminanceHandler(evt) {
+    def widgetId = state.widgets.illuminance[evt.displayName]
     notifyWidget(widgetId, ["value": evt.value])
 }
 
