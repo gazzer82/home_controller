@@ -14,6 +14,9 @@ gem 'json'
 # Database
 gem 'data_mapper'
 
+#news
+gem 'nokogiri'
+
 # Development
 group :development do
 	gem 'dm-sqlite-adapter'
